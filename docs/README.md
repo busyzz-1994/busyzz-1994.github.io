@@ -6,7 +6,7 @@
 
 # VUE PRESS
 
-## travis-ci 使用
+## travis-ci 使用 自动化构建
 
 ![An image](~@/assets/max.jpg)
 
