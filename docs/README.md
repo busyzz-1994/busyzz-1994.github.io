@@ -1,5 +1,5 @@
 # VUE PRESS
 
-![An image](./.vuepress/assets/max.jpg)
+![An image](~@/assets/max.jpg)
 
 [typescript](/typescript/)
