@@ -23,6 +23,13 @@ module.exports = {
     '@vuepress/google-analytics': {
       ga: 'G-4Q01R6R1BJ',
     },
+    '@vssue/vuepress-plugin-vssue': {
+      platform: 'github-v4',
+      owner: 'busyzz-1994',
+      repo: 'busyzz-1994.github.io',
+      clientId: 'f35ba95e6a181bd537f8',
+      clientSecret: '63d1205b2e72c908d59e2369df5d830b69e91b45',
+    },
   },
   configureWebpack: {
     resolve: {
