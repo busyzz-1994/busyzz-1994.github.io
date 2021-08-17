@@ -3,6 +3,7 @@ module.exports = {
   title: 'busyzz',
   description: 'minmin',
   themeConfig: {
+    // 访问的public目录
     logo: '/images/avatar.jpg',
     nav: [
       { text: '首页', link: '/' },
@@ -29,6 +30,7 @@ module.exports = {
       repo: 'busyzz-1994.github.io',
       clientId: 'f35ba95e6a181bd537f8',
       clientSecret: '63d1205b2e72c908d59e2369df5d830b69e91b45',
+      locale: 'zh',
     },
   },
   configureWebpack: {
