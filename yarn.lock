@@ -936,7 +936,7 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
-"@types/json-schema@^7.0.5":
+"@types/json-schema@^7.0.5", "@types/json-schema@^7.0.8":
   version "7.0.9"
   resolved "https://registry.nlark.com/@types/json-schema/download/@types/json-schema-7.0.9.tgz?cache=0&sync_timestamp=1627999389398&other_urls=https%3A%2F%2Fregistry.nlark.com%2F%40types%2Fjson-schema%2Fdownload%2F%40types%2Fjson-schema-7.0.9.tgz#97edc9037ea0c38585320b28964dde3b39e4660d"
   integrity sha1-l+3JA36gw4WFMgsolk3eOznkZg0=
@@ -1173,6 +1173,11 @@
   integrity sha1-6XlECdHVieSVKwcAKRJw0mlubQE=
   dependencies:
     lodash.debounce "^4.0.8"
+
+"@vuepress/plugin-google-analytics@^1.8.2":
+  version "1.8.2"
+  resolved "https://registry.nlark.com/@vuepress/plugin-google-analytics/download/@vuepress/plugin-google-analytics-1.8.2.tgz#96cf65f1f0ecbb3bcf6b0d10089dafe2aea875bc"
+  integrity sha1-ls9l8fDsuzvPaw0QCJ2v4q6odbw=
 
 "@vuepress/plugin-last-updated@1.8.2":
   version "1.8.2"
@@ -1418,7 +1423,7 @@ ajv-keywords@^3.1.0, ajv-keywords@^3.4.1, ajv-keywords@^3.5.2:
   resolved "https://registry.npm.taobao.org/ajv-keywords/download/ajv-keywords-3.5.2.tgz?cache=0&sync_timestamp=1616882441894&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fajv-keywords%2Fdownload%2Fajv-keywords-3.5.2.tgz#31f29da5ab6e00d1c2d329acf7b5929614d5014d"
   integrity sha1-MfKdpatuANHC0yms97WSlhTVAU0=
 
-ajv@^6.1.0, ajv@^6.10.2, ajv@^6.12.3, ajv@^6.12.4:
+ajv@^6.1.0, ajv@^6.10.2, ajv@^6.12.3, ajv@^6.12.4, ajv@^6.12.5:
   version "6.12.6"
   resolved "https://registry.nlark.com/ajv/download/ajv-6.12.6.tgz#baf5a62e802b07d977034586f8c3baf5adf26df4"
   integrity sha1-uvWmLoArB9l3A0WG+MO69a3ybfQ=
@@ -4784,6 +4789,15 @@ loader-utils@^1.0.2, loader-utils@^1.1.0, loader-utils@^1.2.3, loader-utils@^1.4
     emojis-list "^3.0.0"
     json5 "^1.0.1"
 
+loader-utils@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npm.taobao.org/loader-utils/download/loader-utils-2.0.0.tgz#e4cace5b816d425a166b5f097e10cd12b36064b0"
+  integrity sha1-5MrOW4FtQloWa18JfhDNErNgZLA=
+  dependencies:
+    big.js "^5.2.2"
+    emojis-list "^3.0.0"
+    json5 "^2.1.2"
+
 locate-path@^3.0.0:
   version "3.0.0"
   resolved "https://registry.nlark.com/locate-path/download/locate-path-3.0.0.tgz#dbec3b3ab759758071b58fe59fc41871af21400e"
@@ -5048,7 +5062,7 @@ mime-db@1.49.0, "mime-db@>= 1.43.0 < 2":
   resolved "https://registry.nlark.com/mime-db/download/mime-db-1.49.0.tgz#f3dfde60c99e9cf3bc9701d687778f537001cbed"
   integrity sha1-89/eYMmenPO8lwHWh3ePU3ABy+0=
 
-mime-types@^2.1.12, mime-types@~2.1.17, mime-types@~2.1.19, mime-types@~2.1.24:
+mime-types@^2.1.12, mime-types@^2.1.27, mime-types@~2.1.17, mime-types@~2.1.19, mime-types@~2.1.24:
   version "2.1.32"
   resolved "https://registry.nlark.com/mime-types/download/mime-types-2.1.32.tgz?cache=0&sync_timestamp=1627407652875&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fmime-types%2Fdownload%2Fmime-types-2.1.32.tgz#1d00e89e7de7fe02008db61001d9e02852670fd5"
   integrity sha1-HQDonn3n/gIAjbYQAdngKFJnD9U=
@@ -6580,6 +6594,15 @@ schema-utils@^2.6.5:
     ajv "^6.12.4"
     ajv-keywords "^3.5.2"
 
+schema-utils@^3.0.0:
+  version "3.1.1"
+  resolved "https://registry.nlark.com/schema-utils/download/schema-utils-3.1.1.tgz?cache=0&sync_timestamp=1626694902084&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fschema-utils%2Fdownload%2Fschema-utils-3.1.1.tgz#bc74c4b6b6995c1d88f76a8b77bea7219e0c8281"
+  integrity sha1-vHTEtraZXB2I92qLd76nIZ4MgoE=
+  dependencies:
+    "@types/json-schema" "^7.0.8"
+    ajv "^6.12.5"
+    ajv-keywords "^3.5.2"
+
 section-matter@^1.0.0:
   version "1.0.0"
   resolved "https://registry.nlark.com/section-matter/download/section-matter-1.0.0.tgz#e9041953506780ec01d59f292a19c7b850b84167"
@@ -7513,6 +7536,15 @@ url-loader@^1.0.1:
     loader-utils "^1.1.0"
     mime "^2.0.3"
     schema-utils "^1.0.0"
+
+url-loader@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.npm.taobao.org/url-loader/download/url-loader-4.1.1.tgz#28505e905cae158cf07c92ca622d7f237e70a4e2"
+  integrity sha1-KFBekFyuFYzwfJLKYi1/I35wpOI=
+  dependencies:
+    loader-utils "^2.0.0"
+    mime-types "^2.1.27"
+    schema-utils "^3.0.0"
 
 url-parse-lax@^3.0.0:
   version "3.0.0"
