@@ -6,12 +6,12 @@ module.exports = {
     // 访问的public目录
     logo: '/images/avatar.jpg',
     nav: [
-      { text: '首页', link: '/' },
+      { text: '概述', link: '/' },
       { text: 'Typescript', link: '/typescript/' },
       // { text: 'External', link: 'https://google.com' },
     ],
     sidebar: [
-      ['/', '首页'],
+      ['/', '概述'],
       ['/typescript/', 'typescript'],
     ],
     // 未选中的列表是否需要展开
@@ -21,9 +21,6 @@ module.exports = {
   },
   plugins: {
     '@vuepress/back-to-top': true,
-    '@vuepress/google-analytics': {
-      ga: 'G-4Q01R6R1BJ',
-    },
     '@vssue/vuepress-plugin-vssue': {
       platform: 'github-v4',
       owner: 'busyzz-1994',
