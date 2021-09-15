@@ -309,5 +309,45 @@ interface Person {
   gender: "male" | "female";
 }
 
-type T1 = Omit<Person, "name" | "gender">;
+type T1 = Omit<Person, "name" | "gender">; // T1 的类型为 { age: number }
 ```
+
+### `ReturnType<T>`
+
+传入一个函数类型，获取改函数类型的返回值类型
+
+```ts
+// 具体实现
+type ReturnType<T> = T extends (...args: any[]) => infer R ? R : never;
+
+type T1 = ReturnType<() => { name: string; age: number }>; // T1 的类型为 { name: string; age: number }
+
+// 获取一个函数实例的返回值
+function test(a: number, b: number) {
+  return a + b;
+}
+
+type T2 = ReturnType<typeof test>; // T2 的类型为 number
+```
+
+在使用 `redux` 的时候可以将 `reducer` 函数传入 `ReturnType<typeof reducer>` 获取到 `state` 的类型
+
+### `Required<T>`
+
+将 T 中的所有属性设置为必填
+
+```ts
+// 实现
+type IRequired<T> = {
+  [P in keyof T]-?: T[P];
+};
+
+interface Person {
+  name?: string;
+  age?: number;
+}
+
+type T = IRequired<Person>; // T 的类型为 { name: string; age:number  }
+```
+
+`-?:` 可以看做是删除掉可选项，然后属性就变成必选了
