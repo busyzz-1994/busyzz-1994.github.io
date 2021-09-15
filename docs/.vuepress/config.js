@@ -29,6 +29,12 @@ module.exports = {
       clientSecret: '63d1205b2e72c908d59e2369df5d830b69e91b45',
       locale: 'zh',
     },
+    '@vuepress/medium-zoom': {
+      selector: 'img.zoom-custom-imgs',
+      options: {
+        margin: 16,
+      },
+    },
   },
   configureWebpack: {
     resolve: {

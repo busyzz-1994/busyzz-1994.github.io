@@ -25,6 +25,7 @@
     "@vssue/vuepress-plugin-vssue": "^1.4.8",
     "@vuepress/plugin-back-to-top": "^1.8.2",
     "@vuepress/plugin-google-analytics": "^1.8.2",
+    "@vuepress/plugin-medium-zoom": "^1.8.2",
     "url-loader": "^4.1.1",
     "vuepress": "^1.8.2"
   }
