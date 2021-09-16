@@ -611,7 +611,7 @@ const fetch = async () => {
 
 ### JSON to TS
 
-有些时候我们需要将一个 json 数据装换为对应的 typescript 类型文件，可以使用这个在线转换的网站：
+有些时候我们需要将一个 json 数据转换为对应的 typescript 类型文件，可以使用这个在线转换的网站：
 
 [json2Typescript](https://apihelper.jccore.cn/jsontool)
 
