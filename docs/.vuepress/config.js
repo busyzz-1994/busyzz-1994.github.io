@@ -13,7 +13,7 @@ module.exports = {
       {
         title: "指南",
         collapsable: false,
-        children: [["guide", "介绍"]]
+        children: [["guide/", "介绍"]]
       },
       {
         title: "Typescript",
