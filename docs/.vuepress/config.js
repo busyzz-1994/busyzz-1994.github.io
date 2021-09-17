@@ -7,18 +7,21 @@ module.exports = {
     logo: "/images/avatar.jpg",
     nav: [
       { text: "指南", link: "/guide/" },
-      { text: "Typescript", link: "/typescript/basic/" }
+      { text: "Typescript", link: "/typescript/basic" }
     ],
     sidebar: [
       {
         title: "指南",
         collapsable: false,
-        children: [["guide/", "介绍"]]
+        children: [["/guide/", "介绍"]]
       },
       {
         title: "Typescript",
         collapsable: false,
-        children: [["typescript/basic", "Typescript基础"]]
+        children: [
+          ["/typescript/basic", "Typescript基础"],
+          ["/typescript/react", "React中使用TS"]
+        ]
       }
     ],
     // 未选中的列表是否需要展开
