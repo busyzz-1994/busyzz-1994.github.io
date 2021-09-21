@@ -567,6 +567,41 @@ type Combine<T = never, U = never, M = never, K = never, E = never> = T &
 type Test = Combine<T1, T2, T3>;
 ```
 
+### `DeepPartial<T>`
+
+Partial 只能将一个类型的第一层属性设置为可选，更深层无法设置
+
+```ts
+interface Goods {
+  size: {
+    height: number;
+    weight: number;
+  };
+}
+
+const g1: Partial<Goods> = {
+  size: {
+    height: 123
+  }
+};
+// 编译报错 缺少 weight 属性
+
+type DeepPartial<T> = T extends Function
+  ? T
+  : T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;
+
+const g1: DeepPartial<Goods> = {
+  size: {
+    height: 123
+  }
+};
+// 编译通过
+```
+
 ## 七、其他
 
 ### 文件 `.d.ts`
@@ -611,8 +646,12 @@ const fetch = async () => {
 
 ### JSON to TS
 
-有些时候我们需要将一个 json 数据装换为对应的 typescript 类型文件，可以使用这个在线转换的网站：
+有些时候我们需要将一个 json 数据转换为对应的 typescript 类型文件，可以使用这个在线转换的网站：
 
 [json2Typescript](https://apihelper.jccore.cn/jsontool)
+
+### 搜索某个库的类型声明文件
+
+[DefinitelyTyped](https://www.typescriptlang.org/dt/search?search=)
 
 <Vssue />

@@ -22,6 +22,11 @@ module.exports = {
           ["/typescript/basic", "Typescript基础"],
           ["/typescript/react", "React中使用TS"]
         ]
+      },
+      {
+        title: "React",
+        collapsable: false,
+        children: [["/react/hooks", "react hooks"]]
       }
     ],
     // 未选中的列表是否需要展开

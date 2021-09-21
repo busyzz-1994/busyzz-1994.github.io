@@ -415,3 +415,7 @@ type AppProps = {
 import { Button } from "library";
 type ButtonProps = React.ComponentProps<typeof Button>;
 ```
+
+### 更多类型参考
+
+- [react-typescript-cheatsheet](https://react-typescript-cheatsheet.netlify.app/docs/basic/setup)
