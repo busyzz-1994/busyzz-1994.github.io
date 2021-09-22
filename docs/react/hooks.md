@@ -304,6 +304,114 @@ useMount(() => {
 
 可以看到和 `useEffect(() => {}, [])` 大致一样，只是 `useMount` 不用添加依赖也可以访问到最新的 `state`，还有就是使用起来稍微简洁和语义化一点
 
+### useSafeState
+
+有过 react 开发经验的大概都遇到过一个这样的问题，当我们在 `componentDitMount` 或者 `useEffect` 中发送请求，然后去 `setState` 的时候，如果请求接口比较慢，这个时候我们切换页面了，导致组件被销毁，但是接口请求完毕以后又去调用了 `setState`，这个时候 React 就会在控制台报出错误，表明组件在 `销毁后` 是不能调用它内部的 setState 方法的，为了解决这个问题，我们可以使用 `useSafeState`:
+
+```ts
+// 实现
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+  useRef,
+  useCallback
+} from "react";
+function useSafeState<S>(
+  initialState: S | (() => S)
+): [S, Dispatch<SetStateAction<S>>];
+
+function useSafeState<S = undefined>(): [
+  S | undefined,
+  Dispatch<SetStateAction<S | undefined>>
+];
+function useSafeState(initialState?) {
+  const unmountedRef = useRef(false);
+  const [state, setState] = useState(initialState);
+  const setCurrentState = useCallback(currentState => {
+    /** 如果组件已经卸载则不再更新 state */
+    if (unmountedRef.current) return;
+    setState(currentState);
+  }, []);
+  useEffect(() => {
+    unmountedRef.current = false;
+    return () => {
+      unmountedRef.current = true;
+    };
+  }, []);
+
+  return [state, setCurrentState] as const;
+}
+
+export default useSafeState;
+
+// 使用
+const [value, setValue] = useSafeState("");
+useEffect(() => {
+  setTimeout(() => {
+    setValue("从服务端获取的数据");
+  }, 5000);
+}, []);
+```
+
+### useLockFn
+
+用于给一个异步函数增加竞态锁，防止并发执行，比如说在表单提交的时候，防止重复的提交
+
+```tsx
+function mockApiRequest() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve();
+    }, 2000);
+  });
+}
+
+export default () => {
+  const [count, setCount] = useState(0);
+
+  const submit = useLockFn(async () => {
+    console.log("start to submit");
+    await mockApiRequest();
+    setCount(val => val + 1);
+    console.log("Submit finished");
+  });
+
+  return (
+    <>
+      <p>Submit count: {count}</p>
+      <button onClick={submit}>Submit</button>
+    </>
+  );
+};
+```
+
+在这个 demo 里面，即使你反复的点击 `submit` 按钮，也必须等到上次请求结束以后才能进行下一次 submit 操作，其余的都是无效点击，具体实现如下：
+
+```ts
+import { useRef, useCallback } from "react";
+
+const useLockFn = <T extends (...args: any[]) => any>(func: T) => {
+  const funcRef = useRef<T>();
+  const lockRef = useRef(false);
+  funcRef.current = func;
+  return useCallback(async (...args: any[]) => {
+    if (lockRef.current) return;
+    lockRef.current = true;
+    try {
+      await funcRef.current(...args);
+      lockRef.current = false;
+    } catch (e) {
+      lockRef.current = false;
+      throw e;
+    }
+  }, []);
+};
+
+export default useLockFn;
+```
+
 ### usePersistFn
 
 持久化 function 的 Hook。
@@ -474,3 +582,22 @@ return <h1 onClick={() => setCount(0)}>{count}</h1>;
 ```
 
 当我们使用 `useEffect` 的时候，点击以后会发现页面会闪烁一下，count 的值从 0 变为了一个随机数，而使用 `useLayoutEffect` 并不会出现闪烁的问题，但是会有一小段时间的停顿，这是由于他们的执行时机不同导致的，`useEffect` 会在 DOM 渲染完毕以后再执行，它是一个异步的操作，而 `useLayoutEffect` 会在 DOM 渲染前执行，它是一个同步的操作，它会阻塞浏览器的渲染，当发现页面有闪烁的情况时，可以用 `useLayoutEffect` 优化，但是大多情况下还是使用 `useEffect`
+
+### swr
+
+这个是一个数据请求的 hooks 库，他主要提供了这些功能：
+
+- 轮询
+- 请求缓存
+- 预请求
+- 用户聚焦时重新请求
+- 接口错误时重新请求
+- 获取请求状态
+- ...
+
+[swr 中文文档](https://swr.vercel.app/zh-CN/docs/getting-started)
+
+## 参考文档
+
+- [ahooks](https://ahooks.js.org/zh-CN/docs/getting-started)
+- [react-use](https://github.com/streamich/react-use)
