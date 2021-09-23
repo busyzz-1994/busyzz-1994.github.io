@@ -181,6 +181,95 @@ const useForceUpdate = () => {
 const forceUpdate = useForceUpdate();
 ```
 
+### useReactive
+
+提供一种数据响应式的操作体验,定义数据状态不需要写 useState , 直接修改属性即可刷新视图。
+
+实现原理：
+
+```ts
+import { useMemo, useState } from "react";
+// k:v 原对象:代理过的对象
+const proxyMap = new WeakMap();
+// k:v 代理过的对象:原对象
+const rawMap = new WeakMap();
+function isObject(input: object): boolean {
+  return typeof input === "object" && input !== null;
+}
+function observer<T extends object>(initialState: T, cb: () => void): T {
+  const existingProxy = proxyMap.get(initialState);
+  // 添加缓存 防止重新构建proxy
+  if (existingProxy) {
+    return existingProxy;
+  }
+  // 防止代理已经代理过的对象
+  if (rawMap.has(initialState)) {
+    return initialState;
+  }
+  const proxy = new Proxy<T>(initialState, {
+    get(target, key, recevier) {
+      const res = Reflect.get(target, key, recevier);
+      // 做递归代理
+      return isObject(res) ? observer(res, cb) : Reflect.get(target, key);
+    },
+    set(target, key, val, recevier) {
+      const res = Reflect.set(target, key, val, recevier);
+      cb();
+      return res;
+    },
+    deleteProperty(target, key) {
+      const res = Reflect.deleteProperty(target, key);
+      cb();
+      return res;
+    }
+  });
+  proxyMap.set(initialState, proxy);
+  rawMap.set(proxy, initialState);
+  return proxy;
+}
+const useReactive = <T extends object>(initialState: T): T => {
+  const [, setRefresh] = useState({});
+  const state = useMemo(() => {
+    return observer(initialState, () => {
+      // forceUpdate
+      setRefresh({});
+    });
+  }, []);
+  return state;
+};
+
+export default useReactive;
+```
+
+使用 demo:
+
+```tsx
+const Parent: FC = () => {
+  const state = useReactive({
+    name: "busyzz",
+    list: ["a", "b"],
+    other: {
+      like: "sleep"
+    }
+  });
+  return (
+    <div>
+      <h1>{state.name}</h1>
+      {state.list.map(item => (
+        <div key={item}>{item}</div>
+      ))}
+      <h1>{state.other.like}</h1>
+      <Button onClick={() => (state.name = "zzb")}>修改name</Button>
+      <Button onClick={() => state.list.push("c")}>添加list</Button>
+      <Button onClick={() => state.list.pop()}>删除list</Button>
+      <Button onClick={() => (state.other.like = "eat")}>修改other</Button>
+    </div>
+  );
+};
+```
+
+实现原理比较简单，通过 Proxy 对原对象做一个代理，当 `set`、`delete` 操作的时候去 `forceUpdate`
+
 ### useDebounceFn 和 useThrottleFn
 
 防抖、节流函数也是很常用的，主要使用 useRef 来存放传入的函数
