@@ -267,6 +267,36 @@ const test = (input: any) => {
 };
 ```
 
+### as const
+
+`as const` 可以让 typescript 在类型推断的时候使用最小的范围，实现真正意义上的 `常量` ，先来看一个普通的 `const` 声明的常量：
+
+```ts
+const arr = [1, 2]; //  arr 的类型会被推断为 number[]
+arr[2];
+arr.push(3);
+const obj = {
+  name: "busyzz"
+};
+obj.name = "zzb";
+// 以上操作都是被允许
+```
+
+再来看看用 `as const` 声明的常量：
+
+```ts
+const arr = [1, 2] as const; // 这个时候 arr 的类型会被推断为 readonly [1,2] 元祖类型
+arr[2];
+arr.push(3);
+const obj = {
+  name: "busyzz"
+} as const;
+obj.name = "zzb";
+// 以上操作都会在编译阶段报错
+```
+
+需要注意的是：`as const` 与 `Object.freeze` 不同的是，`as const`只在编译阶段有效，编译后的代码和 `const arr = [1,2]` 是一致的
+
 ## 四、泛型
 
 ### 基础使用
