@@ -584,16 +584,16 @@ export default <T extends HTMLElement = HTMLElement>(): [
   useLayoutEffect(() => {
     if (!element.current) return;
     const computedPosition = () => {
-      let {
+      const {
         top,
         left,
         bottom,
         right
       } = element.current.getBoundingClientRect();
-      let clientWidth = window.innerWidth,
+      const clientWidth = window.innerWidth,
         clientHeight = window.innerHeight;
-      //满足该条件说明在视口中
-      let isInViewport =
+      // 满足该条件说明在视口中
+      const isInViewport =
         top < clientHeight && bottom > 0 && left < clientWidth && right > 0;
       setState(isInViewport);
     };

@@ -26,7 +26,10 @@ module.exports = {
       {
         title: "React",
         collapsable: false,
-        children: [["/react/hooks", "react hooks"]]
+        children: [
+          ["/react/hooks", "react-hooks"],
+          ["/react/performance", "react优化"]
+        ]
       }
     ],
     // 未选中的列表是否需要展开
