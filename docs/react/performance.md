@@ -122,3 +122,201 @@ const Parent = () => {
 这个时候可以使用 `usePersistFn`，具体文档请查看 [usePersistFn](/react/hooks#usePersistFn)
 
 综上所述，你会发现要阻止子组件重复渲染是一件比较麻烦的事，它会让我们的代码更加复杂，也许你并不需要用到 `React.memo` ，在 `Antd` 的源码中，他们的组件也并没有用到 `React.memo` 或者 `PureComponent`,个人建议是仅为开销大的组件使用
+
+### useMemo
+
+在需要大量计算的方法时，使用：
+
+```tsx
+function expensiveFunc() {}
+const result = useMemo(expensiveFunc, []);
+```
+
+可以避免 expensiveFunc 重复执行
+
+### key
+
+在渲染列表的时候使用`稳定且唯一`的 key
+
+```tsx
+const [list, setList] = setState([
+  { name: "busyzz", id: "1" },
+  { name: "zzb", id: "2" }
+]);
+{
+  list.map(item => <div key={item.id}>{item.name}</div>);
+}
+```
+
+这取决于 `dom-diff` 算法，在没有`稳定且唯一`的 key 时，可以使用 index,更多的 `dom-diff` 算法相关知识请查看 [精读《DOM diff 原理》](https://zhuanlan.zhihu.com/p/362539108)
+
+### React.Fragment
+
+使用 React.Fragment 避免添加额外的 DOM
+
+```tsx
+<div>
+  <h1>Hello world!</h1>
+  <h1>Hello there!</h1>
+  <h1>Hello there again!</h1>
+</div>
+<>
+  <h1>Hello world!</h1>
+  <h1>Hello there!</h1>
+  <h1>Hello there again!</h1>
+</>
+```
+
+### 虚拟化长列表
+
+> 如果你的应用渲染了长列表（上百甚至上千的数据），我们推荐使用“虚拟滚动”技术。这项技术会在有限的时间内仅渲染有限的内容，并奇迹般地降低重新渲染组件消耗的时间，以及创建 DOM 节点的数量。
+> [react-window](https://github.com/bvaughn/react-window) 和 [react-virtualized](https://github.com/bvaughn/react-virtualized) 是热门的虚拟滚动库。 它们提供了多种可复用的组件，用于展示列表、网格和表格数据。 如果你想要一些针对你的应用做定制优化，你也可以创建你自己的虚拟滚动组件，就像 Twitter 所做的。
+
+### 图片的懒加载
+
+使用 [react-lazyload](https://github.com/twobin/react-lazyload) 做图片的懒加载，即当图片出现在视口当中才去加载图片
+
+```tsx
+import LazyLoad from "react-lazyload";
+<LazyLoad placeholder={<img width="100%" height="100%" src={placeholder} />}>
+  <img src={picUrl} />
+</LazyLoad>;
+```
+
+需要注意的是，当容器滚动的时候需要调用 `forceCheck` 方法
+
+```tsx
+import { forceCheck } from "react-lazyload";
+<div onScroll={useThrottleFn(forceCheck)}>这是一个列表容器</div>;
+```
+
+### 懒加载路由
+
+懒加载路由可以很大程度上减小 build 以后的主 `bundle` 文件大小，减少首屏渲染消耗的时间,主要使用了 `React.Suspense` 和 `React.lazy` 两个方法,这是一个路由的文件 `route.tsx`
+
+```tsx
+import React, { Suspense, lazy, ComponentType } from "react";
+import { RouteConfig } from "react-router-config";
+import { Redirect } from "react-router-dom";
+import routesPath from "./routesPath";
+import HomeLayout from "layout/homeLayout";
+const SuspenseComponent = (Component: ComponentType) => (props: any) => {
+  return (
+    <Suspense fallback={null}>
+      <Component {...props} />
+    </Suspense>
+  );
+};
+/** Home */
+const UserInfo = lazy(() => import("pages/userInfo"));
+const Setting = lazy(() => import("pages/setting"));
+const ComponentPage = lazy(() => import("pages/component"));
+/** Login */
+const Login = lazy(() => import("pages/login"));
+/** Test */
+const Test = lazy(() => import("pages/test"));
+const routes: Array<RouteConfig> = [
+  {
+    path: "/",
+    exact: true,
+    render: () => <Redirect to={routesPath.login} />
+  },
+  {
+    path: routesPath.login,
+    component: SuspenseComponent(Login)
+  },
+  {
+    path: routesPath.test,
+    component: SuspenseComponent(Test)
+  },
+  {
+    path: routesPath.home.root,
+    component: HomeLayout,
+    routes: [
+      {
+        path: routesPath.home.root,
+        exact: true,
+        render: () => <Redirect to={routesPath.home.setting} />
+      },
+      {
+        path: routesPath.home.userInfo,
+        component: SuspenseComponent(UserInfo)
+      },
+      {
+        path: routesPath.home.setting,
+        component: SuspenseComponent(Setting)
+      },
+      {
+        path: routesPath.home.component,
+        component: SuspenseComponent(ComponentPage)
+      }
+    ]
+  }
+];
+
+export default routes;
+```
+
+## build 相关优化
+
+以下内容均以 [create-react-app](https://create-react-app.dev/) 作为基础的脚手架
+
+由于 `create-react-app` 已经做了足够多的优化，我们开发者不用去关心他的实现，所以这里只会写一些 `create-react-app` 没有做的， 后面可能会写一篇关于 `create-react-app` 源码解析的文章。
+
+### splitChunks
+
+通过 splitChunk 我们可以将一些较大的三方库单独打包，这样可以减少主 `bundle` 文件大小，并且可以缓存在客户端
+
+这里分两种情况配置 splitChunks
+
+一、已经通过 `npm run eject`
+
+通过 `npm run eject` 后会在根目录下生成一个 `config/webpack.config.js`, 找到 `splitChunks`选项：
+
+```js
+// vendors regexes
+const reactVendorsRegex =
+  /[\\/]node_modules[\\/](react|react-dom|react-router-dom|react-router|history)[\\/]/;
+const utilVendorsRegex =
+  /[\\/]node_modules[\\/](lodash|moment|moment-timezone|dayjs)[\\/]/;
+const echartsRegex = /[\\/]node_modules[\\/](echarts|zrender)[\\/]/;
+// splitChunks 配置
+ splitChunks: {
+        // chunks: 'all',
+        // name: isEnvDevelopment,
+        chunks: 'all',
+        name: isEnvDevelopment,
+        minChunks: 1,
+        cacheGroups: {
+          reactVendor: {
+            test: reactVendorsRegex,
+            name: 'reactVendor',
+          },
+          utilityVendor: {
+            test: utilVendorsRegex,
+            name: 'utilityVendor',
+          },
+          echartsVendor: {
+            test: echartsRegex,
+            name: 'echartsVendor',
+          },
+        },
+      },
+```
+
+在这里我们将 `react` 、`echarts` 、 `utils` 相关的三方库单独打包
+
+二、没有使用 `npm run eject`
+
+- 安装 `customize-cra` 和 `react-app-rewired`
+- 修改 `package.json` 文件
+- 在根目录下创建一个 `config-overrides.js` 文件
+
+修改 `package.json` 文件中的 `scripts`
+
+```diff
++ "start": "react-app-rewired start"
+- "start": "react-scripts start"
++ "build": "react-app-rewired build"
+- "build": "react-scripts build"
+```
