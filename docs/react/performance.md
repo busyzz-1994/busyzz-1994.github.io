@@ -119,7 +119,7 @@ const Parent = () => {
 这个时候再去修改 `height` 就不会导致 `Child` 组件 `re-render`了，并且代码也变得更加易读了，不再使用 `...` 操作符了，可能你会觉得并没有太多代码上的优化，但是如果 `data` 是一个比较复杂的且层级很深的对象，你就能发现有很大程度的优化了
 
 还存在一个问题，如果将一个函数传入到 `Child` 组件会发生什么呢？
-这个时候可以使用 `usePersistFn`，具体文档请查看 [usePersistFn](/react/hooks#usePersistFn)
+这个时候可以使用 `usePersistFn`，具体文档请查看 [usePersistFn](/react/hooks.html#usepersistfn)
 
 综上所述，你会发现要阻止子组件重复渲染是一件比较麻烦的事，它会让我们的代码更加复杂，也许你并不需要用到 `React.memo` ，在 `Antd` 的源码中，他们的组件也并没有用到 `React.memo` 或者 `PureComponent`,个人建议是仅为开销大的组件使用
 
@@ -320,3 +320,131 @@ const echartsRegex = /[\\/]node_modules[\\/](echarts|zrender)[\\/]/;
 + "build": "react-app-rewired build"
 - "build": "react-scripts build"
 ```
+
+`config-overrides.js`文件：
+
+```js
+const vConsolePlugin = require("vconsole-webpack-plugin");
+const {
+  override,
+  fixBabelImports,
+  addPostcssPlugins,
+  setWebpackOptimizationSplitChunks,
+  addWebpackModuleRule,
+  addWebpackPlugin
+} = require("customize-cra");
+const isDevENV = process.env.NODE_ENV === "development";
+// vendors regexes
+const reactVendorsRegex = /[\\/]node_modules[\\/](react|react-dom|react-router-dom|react-router|history)[\\/]/;
+module.exports = override(
+  // 按需引入 antd-mobile 以及样式文件
+  fixBabelImports("import", {
+    libraryName: "antd-mobile",
+    style: true
+  }),
+  // 兼容 less 文件，可修改主题
+  addWebpackModuleRule({
+    test: /\.less$/,
+    use: [
+      require.resolve("style-loader"),
+      require.resolve("css-loader"),
+      {
+        loader: require.resolve("less-loader"),
+        options: {
+          lessOptions: {
+            modifyVars: {
+              "@brand-primary": "#1DA57A",
+              "@brand-wait": "#1DA57A",
+              "@brand-primary-tap": "#55993a"
+            }
+          }
+        }
+      }
+    ]
+  }),
+  // 添加调试工具 只在开发环境生效
+  addWebpackPlugin(
+    new vConsolePlugin({
+      enable: isDevENV
+    })
+  ),
+  // 将样式文件中的 px 单位转换为 vw
+  addPostcssPlugins([
+    require("postcss-px-to-viewport")({
+      unitToConvert: "px", // 需要转换的单位，默认为"px"；
+      viewportWidth: 750, // 设计稿的视口宽度
+      unitPrecision: 5, // 单位转换后保留的小数位数
+      propList: ["*"], // 要进行转换的属性列表,*表示匹配所有,!表示不转换
+      viewportUnit: "vw", // 转换后的视口单位
+      fontViewportUnit: "vw", // 转换后字体使用的视口单位
+      selectorBlackList: [], // 不进行转换的css选择器，继续使用原有单位
+      minPixelValue: 1, // 设置最小的转换数值
+      mediaQuery: false, // 设置媒体查询里的单位是否需要转换单位
+      replace: true, // 是否直接更换属性值，而不添加备用属性
+      exclude: [/node_modules/]
+    })
+  ]),
+  // 分包 减小主 bundle 文件大小，加快首屏渲染速度
+  setWebpackOptimizationSplitChunks({
+    chunks: "all",
+    name: false,
+    minChunks: 1,
+    cacheGroups: {
+      reactVendor: {
+        test: reactVendorsRegex,
+        name: "reactVendor"
+      }
+    }
+  })
+);
+```
+
+可以看到 `customize-cra` 提供了一系列修改 `webpack` 配置的接口，所以没有特殊需求最好还是不要 `eject` 出来
+
+## 部署
+
+### gzip
+
+`gzip` 压缩可以将静态文件压缩到原来的 `1/4`左右，是非常有效的优化手段，一般我们会用到 `Nginx` 作为静态服务器，在 nginx 中可以这样开启 `gzip` 压缩：
+
+```nginx{11,12}
+server {
+    listen       80;
+    server_name  localhost;
+    charset UTF-8;
+    root   /usr/share/nginx/html;
+
+    #location ^~ /admin/ {
+    #    rewrite ^/admin(/.*)$ $1 last;
+    #}
+    location / {
+        gzip  on;
+        gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript image/svg+xml;
+        try_files $uri $uri/ @index;
+    }
+    location = / {
+        add_header Cache-Control no-cache;
+        try_files /index.html =404;
+    }
+    location @index {
+        add_header Cache-Control no-cache;
+        try_files /index.html =404;
+    }
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}
+```
+
+### CDN
+
+CDN 可以加快用户的访问速度，某些云服务商会设置下载限速，导致用户访问速度变慢，如在 `阿里云` 上的一个 1 核 1G 1MB 的 ECS 上面，下载一个 400KB 的文件需要将近 10 秒，使用 CDN 加速以后 1 秒左右就能下载
+
+`jsdelivr`:
+
+如果是个人项目可以使用 [jsdelivr](https://www.jsdelivr.com/?docs=gh) 配合 `github` 部署，这个是完全免费的
+
+`阿里云 OSS 或者 腾讯云 COS`：
+
+将静态文件上传至 oss 或者 cos，可以使用他们的 CDN 服务，不过是收费的，一般在企业级部署中会用到

@@ -24,6 +24,11 @@ module.exports = {
         ]
       },
       {
+        title: "工程化",
+        collapsable: false,
+        children: [["/engineering/npm", "npm"]]
+      },
+      {
         title: "React",
         collapsable: false,
         children: [
