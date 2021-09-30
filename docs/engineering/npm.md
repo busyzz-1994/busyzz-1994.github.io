@@ -6,7 +6,7 @@
 
 ### npm install
 
-在执行 `npm install react` 在将 react 包安装在 `node_modules` 中的同时也会安装 `react` 依赖的包，并且将写入到 `package.json` 中的 `dependencies`:
+在执行 `npm install react` 时将 react 包安装在 `node_modules` 中的同时也会安装 `react` 依赖的包，并且将写入到 `package.json` 中的 `dependencies`:
 
 ```json
 {
@@ -26,7 +26,7 @@
 
 `npm uninstall react` 删除对应的包
 
-在 `npm 5.x` 版本以后，会自动生成一个 `package-lock.json` 的文件，它的主要功能是锁定版本，保证每次 install 的版本都是一致的，在这里讲解 `npm >= 5.4` 的版本 `package-lock.json` 和 `package.json` 的关系：
+在 `npm 5.x` 版本以后，会自动生成一个 `package-lock.json` 的文件，它的主要功能是锁定版本，确保每次 install 的版本都是一致的，在这里讲解 `npm >= 5.4` 的版本 `package-lock.json` 和 `package.json` 的关系：
 通过 `npm install react` 以后会在 `package.json` 写入：
 
 ```json
@@ -72,13 +72,13 @@ npm version 16.8.5 -> 将版本改为 `16.8.5`
 
 ### npm config
 
-- **npm config get registry** 获取 npm 源
+- **npm config get registry** 获取 npm 源地址
 - **npm config set registry https://registry.npm.taobao.org/** 将 npm 下载源设置为淘宝镜像
 - **npm config get userconfig** 获取你自己 npm 配置的绝对路径，在 `Mac OS` 中对应的文件 `~/.npmrc`
 - **npm config get prefix** 获取通过 `npm install -g` 安装的全局可执行命令存放的路径
 - **npm config get cache** 获取 npm 包缓存的存放路径
 - **npm config set save-prefix="~"** 默认情况下安装的包都是以 `^` 开头的，将 `save-prefix`设置为 `~`
-- **npm config set save-exact true** 将下载的包的版本设置为精确的版本
+- **npm config set save-exact true** 将下载的包的版本设置为精确的版本，默认情况下是 `false`
 
 在这里 `config` 均可以省略掉
 
@@ -100,7 +100,7 @@ npm version 16.8.5 -> 将版本改为 `16.8.5`
 
 ### npm info
 
-npm info <packageName> versions // 查看一个包的所有历史版本信息
+npm info `<packageName>` versions // 查看一个包的所有历史版本信息
 
 ### npm link
 
@@ -125,7 +125,7 @@ const A = require("A");
 > 1. 为当前的 npm 模块创建一个软连接，并且连接到全局的 `node_modules`中，在 `Mac OS` 中的路径是 `/usr/local/lib/node_modules/`
 > 2. 为当前的 npm 模块下的可执行 `bin` 文件，默认情况下的 `node_modules/.bin` 连接到全局，在 `Mac OS` 中的路径为 `/usr/local/bin/`
 
-测试完毕以后记得执行 `unlink`
+测试开发完毕以后记得执行 `unlink`
 
 ```sh
 # A 中
@@ -177,9 +177,133 @@ npm unlink A
 
 默认情况下安装包时使用的 `^`
 
+## package.json
+
+- `version` 包的版本
+- `license` 协议，开源的包一般设置为 MIT
+- `description` 包的描述
+- `private` 是否为私有的包，可以防止包被意外发布到 `npm` 上
+- `main` 入口文件地址
+- `typings` 类型文件，如 `dist/index.d.ts`
+- `module` 指向一个支持 `ES module` 的文件，如 `dist/react-popup.esm.js`，如果用户在使用你的包时，通过 `import` 引入就会找到这个文件，通过 `commonJS` 规范引入的时候引入的是 `main`指向的文件，它的好处在于可以兼容 `webpack` 的 `tree-shaking` 功能
+- `sideEffects` 该字段表示你的 `npm` 包是否有副作用，当设置为 `false` 时代表没有副作用均可以使用 `tree-shaking`，但是如果在 `js` 文件当中使用了 `import index.css` 这种语法，`tree-shaking` 会认为它是一个无用的引入，会给删除掉，所以这个时候我们要设置 `sideEffects:[dist/**/*.css]`
+- `files` 为一个数组，代表的是通过 `npm publish` 要发布的内容,如 ： `"files":["dist","src"]`
+- `engines` 代表依赖的环境, 如：
+
+```json
+  "engines": {
+    "node": ">=10",
+    "npm":">=5.4"
+  },
+```
+
+- `scripts` 为可执行脚本
+- `dependencies` 表示生产环境所依赖的包
+- `devDependencies` 表示开发环境所依赖的包
+- `author` 作者的名称
+- `repository` 仓库所在的地址，一般为 `github` 或者 `gitee` 上的仓库地址
+- `keywords` 它是一个数组，关于你包的一些关键字，用户可以通过这些关键字在 npm 上搜索到你的包
+
+`package.json` 中的字段均可以在 `js` 文件中通过 `process.env.npm_package_` 访问到，如 `process.env.npm_package_version` 获取到包的版本，
+也可以在 `scripts` 中通过 `$` 获取，如
+
+```json
+{
+  "scripts": {
+    "build": "echo $npm_package_version"
+  }
+}
+```
+
+## npm scripts
+
+在 `create-react-app` 中有这样的一个脚本：
+
+```json
+"scripts": {
+  "start": "react-script start"
+}
+```
+
+在使用 `npm run` 的时候，会将 `./node_modules/.bin` 的绝对路径添加到环境变量的 `PATH` 当中，
+所以这里代表的意思是调用 `./node_modules/.bin` 下面的 `react-script` 可执行脚本，并且将 `start` 作为参数传入进去。
+
+来看一下 `scripts` 中是如何传递参数的：
+
+```json
+"scripts": {
+  "test": "node index.js serve --port=3000 --fix --host 127.0.0.1"
+}
+```
+
+执行 `npm run test` 后，我们可以在 `index.js` 文件中通过 `process.argv`获取到传入的参数如下：
+
+```js
+let argv = [
+  "/usr/local/bin/node",
+  "/Users/busyzz/Documents/npm-packages/test/index.js",
+  "serve",
+  "--port=3000",
+  "--fix",
+  "--host",
+  "127.0.0.1"
+];
+```
+
+第一个是 `node` 可执行文件的路径，第二个是当前文件的绝对路径，再之后的都是我们传入进去的，而且全部都是字符串，之所以要用不同的写法去传参，是因为
+这些可执行文件都使用 `minimist` 或者 `yargs` 类似的包来解析参数,通过 `minimist` 来解析我们的参数
+
+```js
+const minimist = require("minimist");
+const rawArgv = process.argv.slice(2);
+let args = minimist(rawArgv);
+let args = {
+  _: ["serve"],
+  port: 3000,
+  fix: true,
+  host: "127.0.0.1"
+};
+```
+
+将参数透传给下一个脚本：
+
+```json
+"scripts": {
+  "build":"node index.js",
+  "deploy": "npm run build -- --port=3000"
+}
+// 等同于
+"scripts": {
+  "build":"node index.js --port=3000",
+  "deploy": "npm run build"
+}
+```
+
+执行多个脚本可以使用 `&&` 和 `&`， `&&` 表示的是前面的脚本执行完毕以后再执行后面的脚本，`&` 表示并行执行
+
+```json
+"scripts": {
+  "test":"",
+  "build":"node index.js",
+  "deploy": "npm run test && npm run build"
+}
+```
+
+指令钩子： `pre` 和 `post`
+
+```json
+"scripts": {
+  "prebuild":"",
+  "build":"node index.js",
+  "postbuild": ""
+}
+```
+
+表示在 `npm run build` 的时候，会自动先执行 `prebuild` 命令，结束以后执行 `postbuild` 命令
+
 ## 将一个 React 组件发布到 NPM
 
-这里是用 [tsdx](https://github.com/jaredpalmer/tsdx#customization) 作为一个开发测试打包的环境，`tsdx` 的好处是不用太多配置就可以完成一个 typescript 版本的 React 组件发布：
+这里是用 [tsdx](https://github.com/jaredpalmer/tsdx#customization) 作为一个开发测试打包的环境，`tsdx` 的好处是不用太多配置就可以完成一个 typescript 版本的 React 组件发布，并且支持 `ES module`
 
 ### 1.通过 `tsdx` 生成项目并启动
 
@@ -257,5 +381,28 @@ module.exports = {
 如果想要使用 `less` , `yarn add less --dev`,并且修改 `tsdx.config.js` 文件 `less:true`
 
 :::warning 注意
-修改了配置文件以后，需要在 `example` 目录下面重新启动，执行 `npm start`
+修改了配置文件以后，需要在 `example` 目录下面重新启动，如果将 `css` 提取出来，记得设置 `package.json` 中的 `sideEffects`
 :::
+
+开发测试完毕以后就可以通过 `npm publish` 发布了
+
+### 3.部署
+
+将组件发布以后，一般会给用户提供一个线上的 `demo` 做为体验，这个时候可以用到 `github-pages`，操作如下：
+
+1. 在根目录下安装 `npm install gh-pages -D`
+2. 在 `github` 上创建一个新的仓库，并将本地项目提交到远程仓库
+3. 对根目录下的 `package.json` 做如下更改：
+
+```diff
+"scripts":{
++ "predeploy": "npm run build && cd example && npm run build -- --public-url https://@name.github.io/@repo",
++ "deploy": "gh-pages -d ./example/dist"
+}
+```
+
+将 `@name` 和 `@repo` 分别替换成你的 `github` 用户名，和仓库名
+
+4. 执行 `npm run deploy`
+
+操作完成以后就可以在 `https://@name.github.io/@repo` 上访问到你的组件了
